@@ -71,9 +71,9 @@ iredmail() {
         /usr/bin/systemctl enable nginx.service
         /usr/bin/systemctl enable php-fpm.service
         /usr/bin/systemctl enable iredapd.service
-        /usr/bin/systemctl enable clamd@amavisd.service
+        /usr/bin/systemctl disable clamd@amavisd.service
         /usr/bin/systemctl enable cbpolicyd.service
-        /usr/bin/systemctl enable amavisd.service
+        /usr/bin/systemctl disable amavisd.service
         /usr/bin/systemctl enable uwsgi.service
         /usr/bin/systemctl enable rsyslog.service
         /usr/bin/systemctl enable crond.service
@@ -84,9 +84,9 @@ iredmail() {
         /usr/bin/systemctl start nginx.service
         /usr/bin/systemctl start php-fpm.service
         /usr/bin/systemctl start iredapd.service
-        /usr/bin/systemctl start clamd@amavisd.service
+        /usr/bin/systemctl stop clamd@amavisd.service
         /usr/bin/systemctl start cbpolicyd.service
-        /usr/bin/systemctl start amavisd.service
+        /usr/bin/systemctl stop amavisd.service
         /usr/bin/systemctl start uwsgi.service
         /usr/bin/systemctl start rsyslog.service
         /usr/bin/systemctl start crond.service
