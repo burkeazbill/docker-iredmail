@@ -14,7 +14,9 @@ replace_iredmail() {
     echo -e "127.0.0.1   mail.$DOMAIN   mail     localhost \n" >> /etc/hosts
     echo -e "::1         mail.$DOMAIN   mail     localhost \n" >> /etc/hosts
     # Replace nameserver
-    echo -e "nameserver 8.8.8.8 \nnameserver 8.8.4.4 \n" > /etc/resolv.conf
+    echo -e "nameserver $DNS1 \n" > /etc/resolv.conf
+    # If more than one DNS server available, comment the line above and use this format:
+    # echo -e "nameserver $DNS1 \nnameserver $DNS2 \n" > /etc/resolv.conf
     # copy config iredmail file
     mv $CONFIG_FILE_TMP $CONFIG_FILE_IRE    
     # replace password
@@ -39,6 +41,16 @@ replace_iredmail() {
     sed -i "s/SOGO_DB_PASSWD=.*/SOGO_DB_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
     sed -i "s/SOGO_SIEVE_MASTER_PASSWD=.*/SOGO_SIEVE_MASTER_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
 
+}
+
+# post-install config edits - allows to override defaults
+post_install_iredmail(){
+    if [ $DISABLE_SSL_REDIRECT ]; then
+        # Disable SSL Redirect for Roundcube mail
+        sed -i "s/force_https'] = .*/force_https'] = false; /" /var/www/roundcubemail-1.2.0/config/config.inc.php
+        # Disable SSL Redirect for iRedAdmin
+        sed -i '/redirect_to_https.tmpl;/s/^/# /' /etc/nginx/conf.d/00-default.conf
+    fi
 }
 
 # install iredmail
@@ -93,6 +105,7 @@ iredmail() {
         # remove iredmail install script
         /usr/bin/systemctl disable iredmail-install.service
         /usr/bin/systemctl stop iredmail-install.service
+        post_install_iredmail
     fi
 
 }
