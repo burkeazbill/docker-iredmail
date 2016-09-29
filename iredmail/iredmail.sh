@@ -45,12 +45,18 @@ replace_iredmail() {
 
 # post-install config edits - allows to override defaults
 post_install_iredmail(){
-    if [ $DISABLE_SSL_REDIRECT ]; then
+
+    echo "Running post_install_iredmail \nChecking SSL Redirect: $DISABLE_SSL_REDIRECT" >> $LOGFILE
+    if [ "$DISABLE_SSL_REDIRECT: == "true" ]; then
         # Disable SSL Redirect for Roundcube mail
+        echo "Disabling Roundcube SSL redirect..." >> $LOGFILE
         sed -i "s/force_https'] = .*/force_https'] = false; /" /var/www/roundcubemail-1.2.0/config/config.inc.php
         # Disable SSL Redirect for iRedAdmin
+        echo "Disabling iRedAdmin SSL redirect..." >> $LOGFILE
         sed -i '/redirect_to_https.tmpl;/s/^/# /' /etc/nginx/conf.d/00-default.conf
     fi
+    echo "Exiting post_install_iredmail" >> $LOGFILE
+    
 }
 
 # install iredmail
@@ -77,6 +83,7 @@ iredmail() {
         replace_iredmail
         install_iredmail
         # enable services
+        echo "Enabling services..." >> $LOGFILE
         /usr/bin/systemctl enable mariadb.service
         /usr/bin/systemctl enable postfix.service
         /usr/bin/systemctl enable dovecot.service
@@ -90,6 +97,7 @@ iredmail() {
         /usr/bin/systemctl enable rsyslog.service
         /usr/bin/systemctl enable crond.service
         # run services
+        echo "Starting services..." >> $LOGFILE
         /usr/bin/systemctl start mariadb.service
         /usr/bin/systemctl start postfix.service
         /usr/bin/systemctl start dovecot.service
