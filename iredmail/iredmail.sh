@@ -149,13 +149,13 @@ iredmail() {
         echo "Services Started!" >> $LOGFILE
         echo "Adding corp.local and abigtelco.com" >> $LOGFILE
         cd /opt/iredmail
-        /opt/iredmail/create_mail_domain_SQL.sh corp.local abigtelco.com
+        /opt/iredmail/create_mail_domain_SQL.sh $ADDL_DOMAINS
         /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/domains.sql
         echo "Adding users to rainpole.com" >> $LOGFILE
         sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
         sed -i "s/USE_DEFAULT_PASSWD=.*/USE_DEFAULT_PASSWD='YES' /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
         cd /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools
-        /bin/bash create_mail_user_SQL.sh rainpole.com administrator ceo cfo cio cloudadmin cmo devmgr devuser ecomops epa infosec itmgr itop-notification gitlab jdev ldev loginsight projmgr rpadmin
+        /bin/bash create_mail_user_SQL.sh $DOMAIN $PRIMARY_DOMAIN_USERS
         /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/output.sql
         # remove iredmail install script
         /usr/bin/systemctl disable iredmail-install.service
