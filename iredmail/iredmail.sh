@@ -7,6 +7,8 @@ CONFIG_FILE_TMP=/opt/iredmail/config.iredmail
 CONFIG_FILE_IRE=/opt/iredmail/iRedMail-$IREDMAIL_VERSION/config
 PASSWD_GENERATOR=$(openssl rand -base64 16)
 LOGFILE=/opt/iredmail/iredmail-install.log
+echo "Disable Mail Scanners set to: $DISABLE_SCANNERS" >> $LOGFILE
+echo "Disable SSL Redirect set to: $DISABLE_SSL_REDIRECT" >> $LOGFILE
 
 replace_iredmail() {
 
@@ -40,7 +42,13 @@ replace_iredmail() {
   sed -i "s/RCM_DB_PASSWD=.*/RCM_DB_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
   sed -i "s/SOGO_DB_PASSWD=.*/SOGO_DB_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
   sed -i "s/SOGO_SIEVE_MASTER_PASSWD=.*/SOGO_SIEVE_MASTER_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
-
+  if [ "$DISABLE_SCANNERS" == "true" ]; then
+    echo "replace section: disabling mail scanners" >> $LOGFILE
+    sed -i '/clamav/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
+    sed -i '/amavisd/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
+    sed -i '/sa_config/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
+    sed -i '/spamassassin/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
+  fi
 }
 
 # post-install config edits - allows to override defaults
@@ -54,15 +62,18 @@ post_install_iredmail(){
     # Disable SSL Redirect for iRedAdmin
     echo "Disabling iRedAdmin SSL redirect..." >> $LOGFILE
     sed -i '/redirect_to_https.tmpl;/s/^/# /' /etc/nginx/conf.d/00-default.conf
-    sed -i '/catchall.tmpl;/i \
-    # Web applications. \
-     include /etc/nginx/templates/roundcube.tmpl; \
-     include /etc/nginx/templates/iredadmin.tmpl; \
-     include /etc/nginx/templates/sogo.tmpl; ' /etc/nginx/conf.d/00-default.conf
+    line=$(sed -n '/php-catchall.tmpl/=' /etc/nginx/conf.d/00-default.conf);
+    line=$(echo $line | cut -d " " -f 1)
+    sed -i "${line} i \    #Web applications.\n    include /etc/nginx/templates/roundcube.tmpl;\n    include /etc/nginx/templates/iredadmin.tmpl;\n    include /etc/nginx/templates/sogo.tmpl;" /etc/nginx/conf.d/00-default.conf
   fi
-  if [ "$DISABLE_MAIL_SCANNERS" == "true"]; then
-    sed -i '/content_filter/s/^/#/' /etc/postfix/main.cf
-    sed -i '/content_filter=smtp-amavis/s/^/#/' /etc/postfix/main.cf
+  if [ "$DISABLE_SCANNERS" == "true" ]; then
+    echo "Disabling content filters in main.cf and master.cf" >> $LOGFILE
+    sed -i '/content_filter/s/^/# /' /etc/postfix/main.cf
+    sed -i '/smtp-amavis/s/^/# /' /etc/postfix/master.cf
+    sed -i '/smtp_data/s/^/# /' /etc/postfix/master.cf
+    sed -i '/smtp_send/s/^/# /' /etc/postfix/master.cf
+    sed -i '/disable_dns/s/^/# /' /etc/postfix/master.cf
+    sed -i '/max_use/s/^/# /' /etc/postfix/master.cf
   fi
   echo "Exiting post_install_iredmail" >> $LOGFILE
 
@@ -101,10 +112,12 @@ iredmail() {
         /usr/bin/systemctl enable nginx.service
         /usr/bin/systemctl enable php-fpm.service
         /usr/bin/systemctl enable iredapd.service
-        if [ "$DISABLE_MAIL_SCANNERS" == "true"]; then
+        if [ "$DISABLE_SCANNERS" == "true" ]; then
+          echo "Disabling clamd and amavisd..." >> $LOGFILE
           /usr/bin/systemctl disable clamd@amavisd.service
           /usr/bin/systemctl disable amavisd.service
         else
+          echo "Enabling clamd and amavisd..." >> $LOGFILE
           /usr/bin/systemctl enable clamd@amavisd.service
           /usr/bin/systemctl enable amavisd.service
         fi
@@ -121,10 +134,12 @@ iredmail() {
         /usr/bin/systemctl start php-fpm.service
         /usr/bin/systemctl start iredapd.service
         /usr/bin/systemctl start cbpolicyd.service
-        if [ "$DISABLE_MAIL_SCANNERS" == "true"]; then
+        if [ "$DISABLE_SCANNERS" == "true" ]; then
+          echo "Stopping clamd and amavisd..." >> $LOGFILE
           /usr/bin/systemctl stop clamd@amavisd.service
           /usr/bin/systemctl stop amavisd.service
         else
+          echo "Starting clamd and amavisd..." >> $LOGFILE
           /usr/bin/systemctl start clamd@amavisd.service
           /usr/bin/systemctl start amavisd.service
         fi
@@ -132,11 +147,21 @@ iredmail() {
         /usr/bin/systemctl start rsyslog.service
         /usr/bin/systemctl start crond.service
         echo "Services Started!" >> $LOGFILE
+        echo "Adding corp.local and abigtelco.com" >> $LOGFILE
+        cd /opt/iredmail
+        /opt/iredmail/create_mail_domain_SQL.sh corp.local abigtelco.com
+        /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/domains.sql
+        echo "Adding users to rainpole.com" >> $LOGFILE
+        sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
+        sed -i "s/USE_DEFAULT_PASSWD=.*/USE_DEFAULT_PASSWD='YES' /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
+        cd /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools
+        /bin/bash create_mail_user_SQL.sh rainpole.com administrator ceo cfo cio cloudadmin cmo devmgr devuser ecomops epa infosec itmgr itop-notification gitlab jdev ldev loginsight projmgr rpadmin
+        /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/output.sql
         # remove iredmail install script
         /usr/bin/systemctl disable iredmail-install.service
         /usr/bin/systemctl stop iredmail-install.service
+        echo "Exiting iredmail function..." >> $LOGFILE
     fi
-    echo "Exiting iredmail function..." >> $LOGFILE
 
 }
 # Install iRedmail
