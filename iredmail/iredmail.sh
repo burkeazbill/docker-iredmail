@@ -1,5 +1,5 @@
 #!/bin/bash
-
+SECONDS = 0
 . /opt/iredmail/iredmail.cfg
 
 ## files
@@ -9,6 +9,8 @@ PASSWD_GENERATOR=$(openssl rand -base64 16)
 LOGFILE=/opt/iredmail/iredmail-install.log
 echo "Disable Mail Scanners set to: $DISABLE_SCANNERS" >> $LOGFILE
 echo "Disable SSL Redirect set to: $DISABLE_SSL_REDIRECT" >> $LOGFILE
+echo "Additional Domains: $ADDL_DOMAINS" >> $LOGFILE
+echo "Primary Domain Users: $PRIMARY_DOMAIN_USERS" >> $LOGFILE
 
 replace_iredmail() {
 
@@ -147,9 +149,9 @@ iredmail() {
         /usr/bin/systemctl start rsyslog.service
         /usr/bin/systemctl start crond.service
         echo "Services Started!" >> $LOGFILE
-        echo "Adding corp.local and abigtelco.com" >> $LOGFILE
+        echo "Adding domains: $ADDL_DOMAINS" >> $LOGFILE
         cd /opt/iredmail
-        /opt/iredmail/create_mail_domain_SQL.sh $ADDL_DOMAINS
+        /bin/bash /opt/iredmail/create_mail_domain_SQL.sh $ADDL_DOMAINS
         /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/domains.sql
         echo "Adding users to rainpole.com" >> $LOGFILE
         sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
@@ -157,10 +159,12 @@ iredmail() {
         cd /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools
         /bin/bash create_mail_user_SQL.sh $DOMAIN $PRIMARY_DOMAIN_USERS
         /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/output.sql
+        duration=$SECONDS
+        echo "$(($duration /60)) minutes and $(($duration % 60)) seconds for install/config to complete." >> $LOGFILE
+        echo "Exiting iredmail function..." >> $LOGFILE
         # remove iredmail install script
         /usr/bin/systemctl disable iredmail-install.service
         /usr/bin/systemctl stop iredmail-install.service
-        echo "Exiting iredmail function..." >> $LOGFILE
     fi
 
 }
