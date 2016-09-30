@@ -44,17 +44,13 @@ if [ $# -lt 2 ]; then
     echo "Usage: $0 domain [domain2 domain3 domain4 ...]"
 else
     # Generate SQL template.
-    generate_sql $@ && \
-    cat <<EOF
+    generate_sql $@
 
-SQL template file was generated successfully, Please import it
-*MANUALLY* after verify the records:
+    echo "SQL template file was generated successfully,
+    Please import it *MANUALLY* after verify the records:
 
-    - ${SQL}
+    Steps to import these users looks like below:
+    # mysql -uroot -p<PASSWORD> vmail < /path/to/domains.sql "
 
-Steps to import these users looks like below:
-
-    # mysql -uroot -p<PASSWORD> vmail < $(SQL);
-
-EOF
+    cat domains.sql
 fi
