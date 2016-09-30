@@ -1,6 +1,6 @@
 # iRedMail Dockerfile in CentOS 7
 
-This repository contains a Dockerfile to build a Docker Machine for iRedMail in CentOS 7
+This repository contains a Dockerfile to build a Docker Machine for [iRedMail](http://www.iredmail.org/) in CentOS 7
 
 ## Base Docker Image
 
@@ -11,7 +11,7 @@ This repository contains a Dockerfile to build a Docker Machine for iRedMail in 
 1. Install [Docker](https://www.docker.com/).
 2. Edit configuration file (iredmail.cfg)
 3. Create/run Container
-4. Access iRedAdmin page at http(s)://yourcontainerhost/iredadmin
+4. Access iRedAdmin page at http(s)://yourcontainerhost/iredadmin (postamaster@yourprimarydomain and password is as you set in iredmail.cfg)
 5. Access Roundcube webmail page at http(s)://yourcontainerhost/mail
 
 ### Build from Github
@@ -38,7 +38,7 @@ Alternatively, you can build an image directly from Github:
 
 --privileged - is required in order for the **systemctl** to function properly
 
--it runs the container in interactive mode and allocates a pseudo-TTY 
+-it runs the container in interactive mode and allocates a pseudo-TTY
 
 --restart=always - allows for you to reboot your container host and have the container run upon reboot
 
