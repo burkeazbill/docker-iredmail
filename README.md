@@ -54,6 +54,14 @@ the final parameter is the name of the image you wish to run
 
 For more official documentation on run parameters, see: https://docs.docker.com/engine/reference/commandline/run/
 
+**docker-compose**
+You may also use docker-compose !
+1. Clone the repository
+2. Edit the iredmail.cfg to fit your needs
+3. Run the following command:
+
+```docker-compose up -d```
+
 ## General Notes
 
 Although there are a few other containers for iRedMail out there, they didn't quite fit my needs so I forked one and updated it to suit my needs. In particular, this repository allows you to:
