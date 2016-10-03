@@ -22,6 +22,7 @@ replace_iredmail() {
   # If more than one DNS server available, comment the line above and use this format:
   # echo -e "nameserver $DNS1 \nnameserver $DNS2 \n" > /etc/resolv.conf
   # copy config iredmail file
+  echo -e "server $NTPSERVER \n" >> /etc/ntp.conf
   mv $CONFIG_FILE_TMP $CONFIG_FILE_IRE
   # replace password
   sed -i "s/MYSQL_ROOT_PASSWD=.*/MYSQL_ROOT_PASSWD='$PASSWD'/g" $CONFIG_FILE_IRE
