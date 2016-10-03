@@ -3,6 +3,7 @@ version: '2'
 services:
   iredmail:
     build: .
+    image: iredmail
     privileged: true
     container_name: iredmail
     restart: always
