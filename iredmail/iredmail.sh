@@ -45,8 +45,17 @@ replace_iredmail() {
   sed -i "s/RCM_DB_PASSWD=.*/RCM_DB_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
   sed -i "s/SOGO_DB_PASSWD=.*/SOGO_DB_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
   sed -i "s/SOGO_SIEVE_MASTER_PASSWD=.*/SOGO_SIEVE_MASTER_PASSWD='$PASSWD_GENERATOR'/g" $CONFIG_FILE_IRE
+  # Disable NTP Pools
+  if [ "$NTPSERVER" ]; then
+    echo " Setting custom NTP Server: $NTPSERVER" >> $LOGFILE
+    sed -i '/iburst/s/^/# /' /etc/ntp.conf
+    sed -i '/server 3/aserver ntp.corp.local iburst' /etc/ntp.conf
+    systemctl enable ntpd
+    systemctl restart ntpd
+    /usr/sbin/ntpq -p >> $LOGFILE
+  fi
   if [ "$DISABLE_SCANNERS" == "true" ]; then
-    echo "replace section: disabling mail scanners" >> $LOGFILE
+    echo "Replace section: disabling mail scanners" >> $LOGFILE
     sed -i '/clamav/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
     sed -i '/amavisd/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
     sed -i '/sa_config/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
