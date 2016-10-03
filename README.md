@@ -11,7 +11,7 @@ This repository contains a Dockerfile to build a Docker Machine for [iRedMail](h
 1. Install [Docker](https://www.docker.com/).
 2. Edit configuration file (iredmail.cfg)
 3. Create/run Container
-4. Access iRedAdmin page at http(s)://yourcontainerhost/iredadmin (postamaster@yourprimarydomain and password is as you set in iredmail.cfg)
+4. Access iRedAdmin page at http(s)://yourcontainerhost/iredadmin (postmaster@yourprimarydomain and password is as you set in iredmail.cfg)
 5. Access Roundcube webmail page at http(s)://yourcontainerhost/mail
 
 ### Build from Github
