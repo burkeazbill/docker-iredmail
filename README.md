@@ -50,7 +50,7 @@ Alternatively, you can build an image directly from Github:
 
 --name defines the name of your running container
 
-the final parameter is the name of the image you wish to run
+The final parameter is the name of the image you wish to run
 
 For more official documentation on run parameters, see: https://docs.docker.com/engine/reference/commandline/run/
 
