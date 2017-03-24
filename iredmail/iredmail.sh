@@ -87,6 +87,8 @@ post_install_iredmail(){
     sed -i '/disable_dns/s/^/# /' /etc/postfix/master.cf
     sed -i '/max_use/s/^/# /' /etc/postfix/master.cf
   fi
+  echo "Relaxing mail sending restrictions in /etc/postfix/helo_access.pcre" >> $LOGFILE
+  sed -i '/(\\.local)/s/^/# /' helo_access.pcre;
   echo "Exiting post_install_iredmail" >> $LOGFILE
 
 }

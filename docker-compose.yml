@@ -11,13 +11,13 @@ services:
     # Privileged mode must be set to true in order for Systemd to function properly
     ports:
       - '80:80'
-      - '443:443'
       - '25:25'
       - '587:587'
       - '110:110'
       - '143:143'
       - '993:993'
       - '995:995'
+    # - '443:443'
     # Data locations are found here http://www.iredmail.org/docs/file.locations.html
     volumes:
       - '/srv/iredmail/vmail:/var/vmail'
