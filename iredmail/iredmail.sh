@@ -89,6 +89,9 @@ post_install_iredmail(){
   fi
   echo "Relaxing mail sending restrictions in /etc/postfix/helo_access.pcre" >> $LOGFILE
   sed -i '/(\\.local)/s/^/# /' helo_access.pcre;
+  echo "Updating to allow for plaintext authentication" >> $LOGFILE
+  sed -i "s/disable_plaintext_auth = yes/disable_plaintext_auth = no/g" /etc/dovecot/dovecot.conf
+  sed -i "s/ssl = required/ssl = yes/g" /etc/dovecot/dovecot.conf
   echo "Exiting post_install_iredmail" >> $LOGFILE
 
 }
