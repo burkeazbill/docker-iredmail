@@ -19,7 +19,7 @@ FROM centos:latest
 MAINTAINER Burke Azbill <dimensionquest@gmail.com>
 
 # Env
-ENV IREDMAIL_VERSION 0.9.5-1
+ENV IREDMAIL_VERSION 0.9.6
 ENV container docker
 ENV HOME /root
 WORKDIR /root
