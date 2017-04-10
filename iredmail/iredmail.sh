@@ -1,5 +1,5 @@
 #!/bin/bash
-SECONDS = 0
+SECONDS=0
 . /opt/iredmail/iredmail.cfg
 
 ## files
