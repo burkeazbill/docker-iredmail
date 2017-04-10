@@ -13,7 +13,8 @@ echo "Additional Domains: $ADDL_DOMAINS" >> $LOGFILE
 echo "Primary Domain Users: $PRIMARY_DOMAIN_USERS" >> $LOGFILE
 
 replace_iredmail() {
-
+  
+  echo " starting replace_iredmail function..." >> $LOGFILE
   # Replace first domain in hosts file
   echo -e "127.0.0.1   mail.$DOMAIN   mail     localhost \n" >> /etc/hosts
   echo -e "::1         mail.$DOMAIN   mail     localhost \n" >> /etc/hosts
@@ -61,12 +62,15 @@ replace_iredmail() {
     sed -i '/sa_config/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
     sed -i '/spamassassin/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
   fi
+  echo " Completed replace_iredmail function..." >> $LOGFILE
+
 }
 
 # post-install config edits - allows to override defaults
 post_install_iredmail(){
 
-  echo "Running post_install_iredmail \nChecking SSL Redirect: $DISABLE_SSL_REDIRECT" >> $LOGFILE
+  echo "Running post_install_iredmail" >> $LOGFILE
+  echo "Checking SSL Redirect: $DISABLE_SSL_REDIRECT" >> $LOGFILE
   if [ "$DISABLE_SSL_REDIRECT" == "true" ]; then
     # Disable SSL Redirect for Roundcube mail
     echo "Disabling Roundcube SSL redirect..." >> $LOGFILE
@@ -99,6 +103,7 @@ post_install_iredmail(){
 # install iredmail
 install_iredmail() {
 
+  echo " Starting install_iredmail function..." >> $LOGFILE
   IREDMAIL_DEBUG='NO' \
   AUTO_USE_EXISTING_CONFIG_FILE=y \
   AUTO_INSTALL_WITHOUT_CONFIRM=y \
@@ -109,78 +114,81 @@ install_iredmail() {
   AUTO_CLEANUP_REPLACE_MYSQL_CONFIG=y \
   AUTO_CLEANUP_RESTART_POSTFIX=n \
   bash /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh >> $LOGFILE
+  echo " Completed install_iredmail function..." >> $LOGFILE
 
 }
 
 # Check if config file exists
 iredmail() {
 
-    echo "Checking configs..." >> $LOGFILE
-    #check config file
-    if [ ! -f /opt/iredmail/iRedMail-$IREDMAIL_VERSION/config ]; then
-        replace_iredmail
-        install_iredmail
-        post_install_iredmail
-        # enable services
-        echo "Enabling services..." >> $LOGFILE
-        /usr/bin/systemctl enable mariadb.service
-        /usr/bin/systemctl enable postfix.service
-        /usr/bin/systemctl enable dovecot.service
-        /usr/bin/systemctl enable nginx.service
-        /usr/bin/systemctl enable php-fpm.service
-        /usr/bin/systemctl enable iredapd.service
-        if [ "$DISABLE_SCANNERS" == "true" ]; then
-          echo "Disabling clamd and amavisd..." >> $LOGFILE
-          /usr/bin/systemctl disable clamd@amavisd.service
-          /usr/bin/systemctl disable amavisd.service
-        else
-          echo "Enabling clamd and amavisd..." >> $LOGFILE
-          /usr/bin/systemctl enable clamd@amavisd.service
-          /usr/bin/systemctl enable amavisd.service
-        fi
-        /usr/bin/systemctl enable cbpolicyd.service
-        /usr/bin/systemctl enable uwsgi.service
-        /usr/bin/systemctl enable rsyslog.service
-        /usr/bin/systemctl enable crond.service
-        # run services
-        echo "Starting services..." >> $LOGFILE
-        /usr/bin/systemctl start mariadb.service
-        /usr/bin/systemctl start postfix.service
-        /usr/bin/systemctl start dovecot.service
-        /usr/bin/systemctl start nginx.service
-        /usr/bin/systemctl start php-fpm.service
-        /usr/bin/systemctl start iredapd.service
-        /usr/bin/systemctl start cbpolicyd.service
-        if [ "$DISABLE_SCANNERS" == "true" ]; then
-          echo "Stopping clamd and amavisd..." >> $LOGFILE
-          /usr/bin/systemctl stop clamd@amavisd.service
-          /usr/bin/systemctl stop amavisd.service
-        else
-          echo "Starting clamd and amavisd..." >> $LOGFILE
-          /usr/bin/systemctl start clamd@amavisd.service
-          /usr/bin/systemctl start amavisd.service
-        fi
-        /usr/bin/systemctl start uwsgi.service
-        /usr/bin/systemctl start rsyslog.service
-        /usr/bin/systemctl start crond.service
-        echo "Services Started!" >> $LOGFILE
-        echo "Adding domains: $ADDL_DOMAINS" >> $LOGFILE
-        cd /opt/iredmail
-        /bin/bash /opt/iredmail/create_mail_domain_SQL.sh $ADDL_DOMAINS
-        /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/domains.sql
-        echo "Adding users to rainpole.com" >> $LOGFILE
-        sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
-        sed -i "s/USE_DEFAULT_PASSWD=.*/USE_DEFAULT_PASSWD='YES' /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
-        cd /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools
-        /bin/bash create_mail_user_SQL.sh $DOMAIN $PRIMARY_DOMAIN_USERS
-        /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/output.sql
-        duration=$SECONDS
-        echo "$(($duration /60)) minutes and $(($duration % 60)) seconds for install/config to complete." >> $LOGFILE
-        echo "Exiting iredmail function..." >> $LOGFILE
-        # remove iredmail install script
-        /usr/bin/systemctl disable iredmail-install.service
-        /usr/bin/systemctl stop iredmail-install.service
-    fi
+  echo " Starting mail iredmail function..." >> $LOGFILE
+  echo "Checking configs..." >> $LOGFILE
+  #check config file
+  if [ ! -f /opt/iredmail/iRedMail-$IREDMAIL_VERSION/config ]; then
+      replace_iredmail
+      install_iredmail
+      post_install_iredmail
+      # enable services
+      echo "Enabling services..." >> $LOGFILE
+      /usr/bin/systemctl enable mariadb.service
+      /usr/bin/systemctl enable postfix.service
+      /usr/bin/systemctl enable dovecot.service
+      /usr/bin/systemctl enable nginx.service
+      /usr/bin/systemctl enable php-fpm.service
+      /usr/bin/systemctl enable iredapd.service
+      if [ "$DISABLE_SCANNERS" == "true" ]; then
+        echo "Disabling clamd and amavisd..." >> $LOGFILE
+        /usr/bin/systemctl disable clamd@amavisd.service
+        /usr/bin/systemctl disable amavisd.service
+      else
+        echo "Enabling clamd and amavisd..." >> $LOGFILE
+        /usr/bin/systemctl enable clamd@amavisd.service
+        /usr/bin/systemctl enable amavisd.service
+      fi
+      /usr/bin/systemctl enable cbpolicyd.service
+      /usr/bin/systemctl enable uwsgi.service
+      /usr/bin/systemctl enable rsyslog.service
+      /usr/bin/systemctl enable crond.service
+      # run services
+      echo "Starting services..." >> $LOGFILE
+      /usr/bin/systemctl start mariadb.service
+      /usr/bin/systemctl start postfix.service
+      /usr/bin/systemctl start dovecot.service
+      /usr/bin/systemctl start nginx.service
+      /usr/bin/systemctl start php-fpm.service
+      /usr/bin/systemctl start iredapd.service
+      /usr/bin/systemctl start cbpolicyd.service
+      if [ "$DISABLE_SCANNERS" == "true" ]; then
+        echo "Stopping clamd and amavisd..." >> $LOGFILE
+        /usr/bin/systemctl stop clamd@amavisd.service
+        /usr/bin/systemctl stop amavisd.service
+      else
+        echo "Starting clamd and amavisd..." >> $LOGFILE
+        /usr/bin/systemctl start clamd@amavisd.service
+        /usr/bin/systemctl start amavisd.service
+      fi
+      /usr/bin/systemctl start uwsgi.service
+      /usr/bin/systemctl start rsyslog.service
+      /usr/bin/systemctl start crond.service
+      echo "Services Started!" >> $LOGFILE
+      echo "Adding domains: $ADDL_DOMAINS" >> $LOGFILE
+      cd /opt/iredmail
+      /bin/bash /opt/iredmail/create_mail_domain_SQL.sh $ADDL_DOMAINS
+      /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/domains.sql
+      echo "Adding users to rainpole.com" >> $LOGFILE
+      sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
+      sed -i "s/USE_DEFAULT_PASSWD=.*/USE_DEFAULT_PASSWD='YES' /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
+      cd /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools
+      /bin/bash create_mail_user_SQL.sh $DOMAIN $PRIMARY_DOMAIN_USERS
+      /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/output.sql
+      duration=$SECONDS
+      echo "$(($duration /60)) minutes and $(($duration % 60)) seconds for install/config to complete." >> $LOGFILE
+      echo "Exiting iredmail function..." >> $LOGFILE
+      # remove iredmail install script
+      /usr/bin/systemctl disable iredmail-install.service
+      /usr/bin/systemctl stop iredmail-install.service
+  fi
+  echo " Completed mail iredmail function..." >> $LOGFILE
 
 }
 # Install iRedmail
