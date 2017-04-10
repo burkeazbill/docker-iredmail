@@ -194,3 +194,4 @@ iredmail() {
 # Install iRedmail
 echo "Starting iRedmail install..." >> $LOGFILE
 iredmail
+shutdown -r now
