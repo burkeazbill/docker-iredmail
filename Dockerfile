@@ -15,7 +15,7 @@
 # Pull base image
 FROM centos:latest
 
-# Maintener
+# Maintainer
 MAINTAINER Burke Azbill <dimensionquest@gmail.com>
 
 # Env
@@ -25,7 +25,8 @@ ENV HOME /root
 WORKDIR /root
 
 # Install packages necessary:
-RUN yum update -y; \
+RUN yum install -y deltarpm; \
+    yum update -y; \
     yum install -y unzip wget curl git tar bzip2 hostname rsyslog openssl epel-release; \
     yum -y reinstall systemd; \
     yum clean all
