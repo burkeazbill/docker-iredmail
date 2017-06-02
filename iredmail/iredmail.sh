@@ -186,7 +186,6 @@ iredmail() {
       echo "Exiting iredmail function..." >> $LOGFILE
       # remove iredmail install script
       /usr/bin/systemctl disable iredmail-install.service
-      /usr/bin/systemctl stop iredmail-install.service
   fi
   echo " Completed mail iredmail function..." >> $LOGFILE
 
