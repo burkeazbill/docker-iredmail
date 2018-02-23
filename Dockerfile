@@ -19,7 +19,7 @@ FROM centos:latest
 MAINTAINER Burke Azbill <dimensionquest@gmail.com>
 
 # Env
-ENV IREDMAIL_VERSION 0.9.6
+ENV IREDMAIL_VERSION 0.9.7
 ENV container docker
 ENV HOME /root
 WORKDIR /root
@@ -27,9 +27,10 @@ WORKDIR /root
 # Install packages necessary:
 RUN yum install -y deltarpm; \
     yum update -y; \
-    yum install -y unzip wget curl git tar bzip2 hostname rsyslog openssl epel-release; \
+    yum install -y unzip wget curl git tar bzip2 ntp hostname rsyslog openssl epel-release; \
     yum -y reinstall systemd; \
-    yum clean all
+    yum clean all; \
+    systemctl enable ntpd
 
 # Get iredmail, extract and remove tar
 RUN mkdir -p /opt/iredmail; \
