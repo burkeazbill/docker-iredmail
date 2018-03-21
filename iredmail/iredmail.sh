@@ -191,7 +191,7 @@ iredmail() {
       cd /opt/iredmail
       /bin/bash /opt/iredmail/create_mail_domain_SQL.sh $ADDL_DOMAINS
       /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/domains.sql
-      echo "Adding users to rainpole.com" >> $LOGFILE
+      echo "Adding users to $DOMAIN" >> $LOGFILE
       sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
       sed -i "s/USE_DEFAULT_PASSWD=.*/USE_DEFAULT_PASSWD='YES' /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
       cd /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools

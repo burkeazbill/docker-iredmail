@@ -1,6 +1,8 @@
 #!/bin/bash
 mkdir -p /srv/iredmail
-cp iredmail.cfg iredmail.bak
+cat iredmail.cfg > iredmail.bak
+cat iredmail/iredmail.sh > iredmail/iredmail.bak
+cat docker-compose.yml > docker-compose.bak
 # Update iredmail.cfg file for HOL vPod use:
 sed -i 's/yourdomain.lab/rainpole.com/g' ./iredmail.cfg
 # Note the use of single quote on next line - this is due to ! being special char
