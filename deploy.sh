@@ -21,9 +21,13 @@ sed -i '/duration=/i\ \ \ \ \ \ \ \ /usr/bin/mysql -uroot -p$PASSWD vmail < /opt
 echo Launching container now: docker-compose up -d
 docker-compose up -d
 sleep 5
-tail -f /srv/iredmail/vmail/*.log
-# TODO: Figure out how to get the following line to work properly: I want it to display/tail
-#       the contents of the log file until the end of the script where it says Container requires reboot
-#       THEN, run the docker-compose restart command
-# sed -n '/Logging started/,/Container requires reboot/p' /srv/iredmail/vmail/*.log
-# docker-compose restart
+#tail -f /srv/iredmail/vmail/*.log
+#sed -n '/Logging started/,/Container requires reboot/p' /srv/iredmail/vmail/*.log
+sh -c 'tail -n +0 --pid=$$ -f /srv/iredmail/vmail/*.log | { sed "/Container requires reboot/ q" && kill $$ ;}'
+docker-compose restart
+#### Additional iRedMail Notes:
+echo Your mail server is ready for testing!
+echo Webmail Administration: http://mail.rainpole.com/iredadmin > /root/iredmail-readme.txt
+echo Login as postmaster@rainpole.com / VMware1! >> /root/iredmail-readme.txt
+echo Webmail URL: http://mail.rainpole.com >> /root/iredmail-readme.txt
+echo The access urls have been added to /root/iredmail-readme.txt
