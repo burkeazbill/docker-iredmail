@@ -104,7 +104,7 @@ post_install_iredmail(){
   if [ "$DISABLE_SSL_REDIRECT" == "true" ]; then
     # Disable SSL Redirect for Roundcube mail
     echo "Disabling Roundcube SSL redirect..." >> $LOGFILE
-    sed -i "s/force_https'] = .*/force_https'] = false; /" /var/www/roundcubemail-1.2.0/config/config.inc.php
+    sed -i "s/force_https'] = .*/force_https'] = false; /" /var/www/roundcubemail/config/config.inc.php
     echo "Disabling iRedAdmin SSL redirect..." >> $LOGFILE
     rm -f /etc/nginx/sites-conf.d/default/1-include-tmpl-redirect-to-https.conf
     cp /etc/nginx/sites-conf.d/default-ssl/*iredadmin.conf /etc/nginx/sites-conf.d/default/
@@ -192,10 +192,10 @@ iredmail() {
       /bin/bash /opt/iredmail/create_mail_domain_SQL.sh $ADDL_DOMAINS
       /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/domains.sql
       echo "Adding users to $DOMAIN" >> $LOGFILE
-      sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
-      sed -i "s/USE_DEFAULT_PASSWD=.*/USE_DEFAULT_PASSWD='YES' /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_mail_user_SQL.sh
+      sed -i "s/DEFAULT_PASSWD=.*/DEFAULT_PASSWD="$PASSWD" /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_user_SQL.sh
+      sed -i "s/USE_DEFAULT_PASSWD=.*/USE_DEFAULT_PASSWD='YES' /" /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/create_user_SQL.sh
       cd /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools
-      /bin/bash create_mail_user_SQL.sh $DOMAIN $PRIMARY_DOMAIN_USERS
+      /bin/bash create_user_SQL.sh $DOMAIN $PRIMARY_DOMAIN_USERS
       /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/output.sql
       duration=$SECONDS
       echo "$(($duration /60)) minutes and $(($duration % 60)) seconds for install/config to complete." >> $LOGFILE

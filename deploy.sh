@@ -15,7 +15,7 @@ sed -i 's/PRIMARY_DOMAIN_USERS=.*/PRIMARY_DOMAIN_USERS="administrator ceo cfo ci
 sed -i 's/utility/mail.rainpole.com/g' ./docker-compose.yml
 # Now, add two lines to the iredmail.sh script to add all the primary domain users to the corp.local domain as well
 # Duplicate the following 2 lines for each additional domain you wish to add the users to
-sed -i '/duration=/i\ \ \ \ \ \ \ \ /bin/bash create_mail_user_SQL.sh corp.local $PRIMARY_DOMAIN_USERS' iredmail/iredmail.sh
+sed -i '/duration=/i\ \ \ \ \ \ \ \ /bin/bash create_user_SQL.sh corp.local $PRIMARY_DOMAIN_USERS' iredmail/iredmail.sh
 sed -i '/duration=/i\ \ \ \ \ \ \ \ /usr/bin/mysql -uroot -p$PASSWD vmail < /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools/output.sql' iredmail/iredmail.sh
 # Build and launch Container:
 docker-compose up -d
