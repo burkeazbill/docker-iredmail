@@ -20,4 +20,12 @@ sed -i '/duration=/i\ \ \ \ \ \ \ \ /usr/bin/mysql -uroot -p$PASSWD vmail < /opt
 # Build and launch Container:
 docker-compose up -d
 sleep 5
-tail -f /srv/iredmail/vmail/*.log
+#tail -f /srv/iredmail/vmail/*.log
+sed -n '/Logging started/,/Container requires reboot/p' /srv/iredmail/vmail/*.log
+docker-compose restart
+#### Additional iRedMail Notes:
+echo Webmail Administration: http://mail.rainpole.com/iredadmin >> /root/iredmail-readme.txt
+echo Login as postmaster@rainpole.com / VMware1! >> /root/iredmail-readme.txt
+echo Webmail URL: http://mail.rainpole.com >> /root/iredmail-readme.txt
+echo The access urls have been added to /root/iredmail-readme.txt
+cat /root/iredmail-readme.txt
