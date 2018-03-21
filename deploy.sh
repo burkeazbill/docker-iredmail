@@ -8,7 +8,7 @@ sed -i 's/Passw0rd!/VMware1!/g' ./iredmail.cfg
 sed -i 's/x.x.x.x/192.168.110.10/g' ./iredmail.cfg
 sed -i 's/domain2.lab domain3.lab/corp.local abigtelco.com/g' ./iredmail.cfg
 sed -i 's/# NTPSERVER=.*/NTPSERVER="ntp.corp.local"/g' ./iredmail.cfg
-sed -i 's/PRIMARY_DOMAIN_USERS=.*/PRIMARY_DOMAIN_USERS="administrator ceo cfo cio cloudadmin cmo devmgr devuser ecomops epa infosec itmgr itop-notification gitlab jdev ldev loginsight projmgr rpadmin vra"/g' ./iredmail.cfg
+sed -i 's/PRIMARY_DOMAIN_USERS=.*/PRIMARY_DOMAIN_USERS="administrator ceo cfo cio cloudadmin cmo devmgr devuser ecomops epa infosec itmgr itop-notification gitlab jdev ldev loginsight projmgr rpadmin vra vrops vro vcenter"/g' ./iredmail.cfg
 # Update docker-compose file with hostname:
 sed -i 's/utility/mail.rainpole.com/g' ./docker-compose.yml
 # Now, add two lines to the iredmail.sh script to add all the primary domain users to the corp.local domain as well
