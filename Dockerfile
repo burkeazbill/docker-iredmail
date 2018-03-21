@@ -13,10 +13,10 @@
 # docker exec -it container_name bash
 
 # Pull base image
-FROM centos:latest
+FROM centos:7
 
 # Maintainer
-MAINTAINER Burke Azbill <dimensionquest@gmail.com>
+# MAINTAINER Burke Azbill <dimensionquest@gmail.com>
 
 # Env
 ENV IREDMAIL_VERSION 0.9.7
@@ -25,30 +25,31 @@ ENV HOME /root
 WORKDIR /root
 
 # Install packages necessary:
-RUN yum install -y deltarpm; \
+RUN mkdir -p /opt/iredmail; \
+    yum install -y deltarpm; \
     yum update -y; \
-    yum install -y unzip wget curl git tar bzip2 ntp hostname rsyslog openssl epel-release; \
+    yum install -y unzip wget curl git tar bzip2 hostname which rsyslog openssl; \
     yum -y reinstall systemd; \
-    yum clean all; \
-    systemctl enable ntpd
+    yum clean all;
+
+# The last two lines above cleanup the extracted files and permissions
 
 # Get iredmail, extract and remove tar
 RUN mkdir -p /opt/iredmail; \
     cd /opt/iredmail; \
     wget -c https://bitbucket.org/zhb/iredmail/downloads/iRedMail-$IREDMAIL_VERSION.tar.bz2; \
-    tar xjf iRedMail-$IREDMAIL_VERSION.tar.bz2; \
-    rm iRedMail-$IREDMAIL_VERSION.tar.bz2
+    tar xjf iRedMail-$IREDMAIL_VERSION.tar.bz2;
 
 # Install systemd
 # RUN yum -y reinstall systemd; yum clean all; \
 RUN  (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
-     rm -f /lib/systemd/system/multi-user.target.wants/*;\
-     rm -f /etc/systemd/system/*.wants/*;\
-     rm -f /lib/systemd/system/local-fs.target.wants/*; \
-     rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
-     rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
-     rm -f /lib/systemd/system/basic.target.wants/*;\
-     rm -f /lib/systemd/system/anaconda.target.wants/*;
+    rm -f /lib/systemd/system/multi-user.target.wants/*;\
+    rm -f /etc/systemd/system/*.wants/*;\
+    rm -f /lib/systemd/system/local-fs.target.wants/*; \
+    rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+    rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+    rm -f /lib/systemd/system/basic.target.wants/*;\
+    rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 # Copy script and config files
 ADD iredmail/config.iredmail /opt/iredmail/
@@ -56,8 +57,11 @@ ADD iredmail/iredmail.sh /opt/iredmail/iredmail.sh
 ADD iredmail.cfg /opt/iredmail/iredmail.cfg
 ADD iredmail/create_mail_domain_SQL.sh /opt/iredmail/create_mail_domain_SQL.sh
 ADD iredmail/iredmail-install.service /etc/systemd/system/iredmail-install.service
-
+ADD iredmail/create_user_SQL.sh /opt/iredmail/iRedMail-$IREDMAIL_VERSION/tools
 RUN chmod +x /opt/iredmail/iredmail.sh
+RUN cd /opt/iredmail; \
+    chown -R root:root /opt/iredmail/iRed* ; \
+    find /opt/iredmail/ -name "._*" -type f -delete
 RUN ln -s /etc/systemd/system/iredmail-install.service /etc/systemd/system/multi-user.target.wants/iredmail-service.service
 
 # Set volume for systemd
@@ -73,3 +77,4 @@ WORKDIR /opt/iredmail
 
 # Run systemd
 CMD ["/usr/sbin/init"]
+

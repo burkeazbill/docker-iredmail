@@ -6,7 +6,9 @@ SECONDS=0
 CONFIG_FILE_TMP=/opt/iredmail/config.iredmail
 CONFIG_FILE_IRE=/opt/iredmail/iRedMail-$IREDMAIL_VERSION/config
 PASSWD_GENERATOR=$(openssl rand -base64 16)
-LOGFILE=/opt/iredmail/iredmail-install.log
+LOGFILE=/var/vmail/iredmail-install.log
+echo "Logging started, additional config info found in /opt/iredmail/ " > $LOGFILE
+echo "Domain set to: $DOMAIN" >> $LOGFILE
 echo "Disable Mail Scanners set to: $DISABLE_SCANNERS" >> $LOGFILE
 echo "Disable SSL Redirect set to: $DISABLE_SSL_REDIRECT" >> $LOGFILE
 echo "Additional Domains: $ADDL_DOMAINS" >> $LOGFILE
@@ -14,16 +16,26 @@ echo "Primary Domain Users: $PRIMARY_DOMAIN_USERS" >> $LOGFILE
 
 replace_iredmail() {
   
-  echo " starting replace_iredmail function..." >> $LOGFILE
+  echo '\n\n' >> $LOGFILE
+  echo "================================================================================" >> $LOGFILE
+  echo '\n' >> $LOGFILE
+  echo "Starting replace_iredmail function..." >> $LOGFILE
   # Replace first domain in hosts file
-  echo -e "127.0.0.1   mail.$DOMAIN   mail     localhost \n" >> /etc/hosts
+  # sed -i "s/localhost/mail.$DOMAIN   mail     localhost /g" /etc/hosts >> $LOGFILE
+  echo -e "127.0.0.1   mail.$DOMAIN   mail     localhost \n" > /etc/hosts
   echo -e "::1         mail.$DOMAIN   mail     localhost \n" >> /etc/hosts
+  # sed -i "s/::1     localhost ip6-localhost ip6-loopback/::1     mail.$DOMAIN   mail     localhost ip6-localhost ip6-loopback /g" /etc/hosts
+  echo "Updated hosts file:" >> $LOGFILE
+  cat /etc/hosts  >> $LOGFILE
+
   # Replace nameserver
   echo -e "nameserver $DNS1 \n" > /etc/resolv.conf
   # If more than one DNS server available, comment the line above and use this format:
   # echo -e "nameserver $DNS1 \nnameserver $DNS2 \n" > /etc/resolv.conf
+  echo "Updated resolv.conf file:" >> $LOGFILE
+  cat /etc/resolv.conf  >> $LOGFILE
+
   # copy config iredmail file
-  echo -e "server $NTPSERVER \n" >> /etc/ntp.conf
   mv $CONFIG_FILE_TMP $CONFIG_FILE_IRE
   # replace password
   sed -i "s/MYSQL_ROOT_PASSWD=.*/MYSQL_ROOT_PASSWD='$PASSWD'/g" $CONFIG_FILE_IRE
@@ -50,7 +62,7 @@ replace_iredmail() {
   if [ "$NTPSERVER" ]; then
     echo " Setting custom NTP Server: $NTPSERVER" >> $LOGFILE
     sed -i '/iburst/s/^/# /' /etc/ntp.conf
-    sed -i '/server 3/aserver ntp.corp.local iburst' /etc/ntp.conf
+    sed -i '/server 3/aserver $NTPSERVER iburst' /etc/ntp.conf
     systemctl enable ntpd
     systemctl restart ntpd
     /usr/sbin/ntpq -p >> $LOGFILE
@@ -63,6 +75,24 @@ replace_iredmail() {
     sed -i '/spamassassin/s/^/# /' /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh
   fi
   echo " Completed replace_iredmail function..." >> $LOGFILE
+
+}
+
+# install iredmail
+install_iredmail() {
+
+  echo " Starting install_iredmail function..." >> $LOGFILE
+  IREDMAIL_DEBUG='NO' \
+  AUTO_USE_EXISTING_CONFIG_FILE=y \
+  AUTO_INSTALL_WITHOUT_CONFIRM=y \
+  AUTO_CLEANUP_REMOVE_SENDMAIL=y \
+  AUTO_CLEANUP_REMOVE_MOD_PYTHON=y \
+  AUTO_CLEANUP_REPLACE_FIREWALL_RULES=n \
+  AUTO_CLEANUP_RESTART_IPTABLES=y \
+  AUTO_CLEANUP_REPLACE_MYSQL_CONFIG=y \
+  AUTO_CLEANUP_RESTART_POSTFIX=n \
+  bash /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh >> $LOGFILE
+  echo " Completed install_iredmail function..." >> $LOGFILE
 
 }
 
@@ -100,24 +130,6 @@ post_install_iredmail(){
 
 }
 
-# install iredmail
-install_iredmail() {
-
-  echo " Starting install_iredmail function..." >> $LOGFILE
-  IREDMAIL_DEBUG='NO' \
-  AUTO_USE_EXISTING_CONFIG_FILE=y \
-  AUTO_INSTALL_WITHOUT_CONFIRM=y \
-  AUTO_CLEANUP_REMOVE_SENDMAIL=y \
-  AUTO_CLEANUP_REMOVE_MOD_PYTHON=y \
-  AUTO_CLEANUP_REPLACE_FIREWALL_RULES=n \
-  AUTO_CLEANUP_RESTART_IPTABLES=y \
-  AUTO_CLEANUP_REPLACE_MYSQL_CONFIG=y \
-  AUTO_CLEANUP_RESTART_POSTFIX=n \
-  bash /opt/iredmail/iRedMail-$IREDMAIL_VERSION/iRedMail.sh >> $LOGFILE
-  echo " Completed install_iredmail function..." >> $LOGFILE
-
-}
-
 # Check if config file exists
 iredmail() {
 
@@ -145,8 +157,8 @@ iredmail() {
         /usr/bin/systemctl enable clamd@amavisd.service
         /usr/bin/systemctl enable amavisd.service
       fi
-      /usr/bin/systemctl enable cbpolicyd.service
-      /usr/bin/systemctl enable uwsgi.service
+      #/usr/bin/systemctl enable cbpolicyd.service
+      #/usr/bin/systemctl enable uwsgi.service
       /usr/bin/systemctl enable rsyslog.service
       /usr/bin/systemctl enable crond.service
       # run services
@@ -154,10 +166,10 @@ iredmail() {
       /usr/bin/systemctl start mariadb.service
       /usr/bin/systemctl start postfix.service
       /usr/bin/systemctl start dovecot.service
-      /usr/bin/systemctl start nginx.service
-      /usr/bin/systemctl start php-fpm.service
+      #/usr/bin/systemctl start nginx.service
+      #/usr/bin/systemctl start php-fpm.service
       /usr/bin/systemctl start iredapd.service
-      /usr/bin/systemctl start cbpolicyd.service
+      #/usr/bin/systemctl start cbpolicyd.service
       if [ "$DISABLE_SCANNERS" == "true" ]; then
         echo "Stopping clamd and amavisd..." >> $LOGFILE
         /usr/bin/systemctl stop clamd@amavisd.service
@@ -167,7 +179,7 @@ iredmail() {
         /usr/bin/systemctl start clamd@amavisd.service
         /usr/bin/systemctl start amavisd.service
       fi
-      /usr/bin/systemctl start uwsgi.service
+      #/usr/bin/systemctl start uwsgi.service
       /usr/bin/systemctl start rsyslog.service
       /usr/bin/systemctl start crond.service
       echo "Services Started!" >> $LOGFILE
@@ -193,4 +205,5 @@ iredmail() {
 # Install iRedmail
 echo "Starting iRedmail install..." >> $LOGFILE
 iredmail
-shutdown -r now
+echo "Container requires reboot in order to start iRedMail services." >> $LOGFILE
+# shutdown -r now
