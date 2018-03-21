@@ -21,8 +21,8 @@ sed -i '/duration=/i\ \ \ \ \ \ \ \ /usr/bin/mysql -uroot -p$PASSWD vmail < /opt
 echo Launching container now: docker-compose up -d
 docker-compose up -d
 sleep 5
-#tail -f /srv/iredmail/vmail/*.log
-#sed -n '/Logging started/,/Container requires reboot/p' /srv/iredmail/vmail/*.log
+# The following line tails the iredmail-installation.log file until it sees the text "Container requires reboot"
+# This allows you to see the progress. At the end, it will kill the tail process so that this script may complete
 sh -c 'tail -n +0 --pid=$$ -f /srv/iredmail/vmail/*.log | { sed "/Container requires reboot/ q" && kill $$ ;}'
 docker-compose restart
 #### Additional iRedMail Notes:
