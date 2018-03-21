@@ -3,26 +3,44 @@
 This repository contains a Dockerfile to build a Docker Machine for [iRedMail](http://www.iredmail.org/) in CentOS 7
 
 ## Base Docker Image
-
-* This Dockerfile builds direct from centos:latest
+* This Dockerfile builds direct from centos:7
 
 ## Installation / Usage
-
 1. Install [Docker](https://www.docker.com/).
 2. Edit configuration file (iredmail.cfg)
 3. Create/run Container
 4. Access iRedAdmin page at http(s)://yourcontainerhost/iredadmin (postmaster@yourprimarydomain and password is as you set in iredmail.cfg)
 5. Access Roundcube webmail page at http(s)://yourcontainerhost/mail
 
+### Deploy and Cleanup Scripts
+When it came time to update this repo, I found myself doing a lot of manual commands to spin-up a container, find and resolve errors, then numerous commands to clean everything up. No sense in repeating this every time so the following scripts were written for my use and shared here.
+#### deploy.sh
+This script is used for automatically modifying the *iredmail.cfg* file and running docker-compose up -d with a single command. If you choose to use this method for spinning up an iRedMail container then there is no need to manually edit the *iredmail.cfg* file. The script does the following:
+- Creates the data directory on the docker host in /srv/iredmail
+- Creates a backup of the iredmail.cfg file
+- Customizes the iredmail.cfg for your deployment
+- Runs docker-compose up -d to build and launch the container in daemon mode
+- Waits 5 seconds then tails the */srv/iredmail/vmail/iredmail-install.log* file so you know when to restart the container for regular usage with docker-compose restart
+
+**NOTE:** If using these scripts on MacOS, be sure to configure docker to add /srv to your Docker preferences under the File Sharing tab. This is the folder that will hold all of your iRedMail data and the iredmail-install.log.
+
+#### cleanup.sh
+This is a simple cleanup script that I needed when repeatedly deploying/testing/troubleshooting/cleaning up this container. It does the following:
+- kills the currently deployed "iredmail" container
+- removes the container from docker
+- removes the iredmail:latest image from your system
+- restores the modifed iredmail.cfg back to defaults and deletes the backup copy
+- (optionally) deletes the /srv/iredmail data (Must uncomment last line of script)
+
 ### Build from Github
 
 To create the docker image, clone this repository and execute the following command on the docker-iredmail folder:
 
-`docker build -t burkeazbill/iredmail:latest .`
+```docker build -t burkeazbill/iredmail:latest .```
 
 Alternatively, you can build an image directly from Github:
 
-`docker build -t="burkeazbill/iredmail:latest" github.com/burkeazbill/docker-iredmail`
+```docker build -t="burkeazbill/iredmail:latest" github.com/burkeazbill/docker-iredmail```
 
 ### Create and run a container
 
@@ -63,7 +81,6 @@ You may also use docker-compose !
 ```docker-compose up -d```
 
 ## General Notes
-
 Although there are a few other containers for iRedMail out there, they didn't quite fit my needs so I forked one and updated it to suit my needs. In particular, this repository allows you to:
 - Disable the SSL redirect on the Roundcube Mail client and iRedAdmin page. I didnt' want this as my intention for this is an isolated test/dev environment.
 - Disable the ClamAV/Amavis/Spamassassin integration for the same reasons as disabling SSL.
