@@ -105,12 +105,16 @@ post_install_iredmail(){
     # Disable SSL Redirect for Roundcube mail
     echo "Disabling Roundcube SSL redirect..." >> $LOGFILE
     sed -i "s/force_https'] = .*/force_https'] = false; /" /var/www/roundcubemail-1.2.0/config/config.inc.php
-    # Disable SSL Redirect for iRedAdmin
     echo "Disabling iRedAdmin SSL redirect..." >> $LOGFILE
-    sed -i '/redirect_to_https.tmpl;/s/^/# /' /etc/nginx/conf.d/00-default.conf
-    line=$(sed -n '/php-catchall.tmpl/=' /etc/nginx/conf.d/00-default.conf);
-    line=$(echo $line | cut -d " " -f 1)
-    sed -i "${line} i \    #Web applications.\n    include /etc/nginx/templates/roundcube.tmpl;\n    include /etc/nginx/templates/iredadmin.tmpl;\n    include /etc/nginx/templates/sogo.tmpl;" /etc/nginx/conf.d/00-default.conf
+    rm -f /etc/nginx/sites-conf.d/default/1-include-tmpl-redirect-to-https.conf
+    cp /etc/nginx/sites-conf.d/default-ssl/*iredadmin.conf /etc/nginx/sites-conf.d/default/
+    cp /etc/nginx/sites-conf.d/default-ssl/*roundcube.conf /etc/nginx/sites-conf.d/default/
+    systemctl restart nginx
+    # OLD Method
+    #sed -i '/redirect_to_https.tmpl;/s/^/# /' /etc/nginx/conf.d/00-default.conf
+    #line=$(sed -n '/php-catchall.tmpl/=' /etc/nginx/conf.d/00-default.conf);
+    #line=$(echo $line | cut -d " " -f 1)
+    #sed -i "${line} i \    #Web applications.\n    include /etc/nginx/templates/roundcube.tmpl;\n    include /etc/nginx/templates/iredadmin.tmpl;\n    include /etc/nginx/templates/sogo.tmpl;" /etc/nginx/conf.d/00-default.conf
   fi
   if [ "$DISABLE_SCANNERS" == "true" ]; then
     echo "Disabling content filters in main.cf and master.cf" >> $LOGFILE
