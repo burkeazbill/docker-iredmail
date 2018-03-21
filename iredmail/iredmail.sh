@@ -61,8 +61,8 @@ replace_iredmail() {
   # Disable NTP Pools
   if [ "$NTPSERVER" ]; then
     echo " Setting custom NTP Server: $NTPSERVER" >> $LOGFILE
-    sed -i '/iburst/s/^/# /' /etc/ntp.conf
-    sed -i '/server 3/aserver $NTPSERVER iburst' /etc/ntp.conf
+    sed -i "/iburst/s/^/# / /etc/ntp.conf"
+    sed -i "/server 3/aserver $NTPSERVER iburst" /etc/ntp.conf
     systemctl enable ntpd
     systemctl restart ntpd
     /usr/sbin/ntpq -p >> $LOGFILE
