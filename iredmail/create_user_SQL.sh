@@ -30,6 +30,8 @@
 # -------------------------------------------------------------------
 
 # ChangeLog:
+#   - 2018.03.21 (Burke Azbill) Updated lines 125 and 126 to match iRedMail 0.9.7 script
+#     so that this older script version may be used for bulk user import
 #   - 2009.05.07 Add hashed maildir style support.
 #   - Improve file detect.
 #   - Drop output message of 'which dos2unix'.

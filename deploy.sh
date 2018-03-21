@@ -1,4 +1,5 @@
 #!/bin/bash
+mkdir -p /srv/iredmail
 cp iredmail.cfg iredmail.bak
 # Update iredmail.cfg file for HOL vPod use:
 sed -i 's/yourdomain.lab/rainpole.com/g' ./iredmail.cfg
