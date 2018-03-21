@@ -28,7 +28,7 @@ WORKDIR /root
 RUN mkdir -p /opt/iredmail; \
     yum install -y deltarpm; \
     yum update -y; \
-    yum install -y unzip wget curl git tar bzip2 hostname which rsyslog openssl; \
+    yum install -y unzip wget curl git tar ntp bzip2 hostname which rsyslog openssl; \
     yum -y reinstall systemd; \
     yum clean all;
 
