@@ -202,6 +202,8 @@ iredmail() {
       echo "Exiting iredmail function..." >> $LOGFILE
       # remove iredmail install script
       /usr/bin/systemctl disable iredmail-install.service
+      /usr/bin/systemctl disable firewalld
+      /usr/bin/systemctl stop firewalld
   fi
   echo " Completed mail iredmail function..." >> $LOGFILE
 
@@ -209,5 +211,5 @@ iredmail() {
 # Install iRedmail
 echo "Starting iRedmail install..." >> $LOGFILE
 iredmail
-echo "Container requires reboot in order to start iRedMail services." >> $LOGFILE
+echo "Container requires reboot in order to start iRedMail services.\n Press CTRL+C to exit tail, then run: \n docker-compose restart" >> $LOGFILE
 # shutdown -r now
