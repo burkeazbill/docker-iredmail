@@ -86,3 +86,6 @@ Although there are a few other containers for iRedMail out there, they didn't qu
 - Disable the ClamAV/Amavis/Spamassassin integration for the same reasons as disabling SSL.
 - Automatically create additional domains
 - Automatically create a set of default mailboxes (all of which will use the password defined in the iredmail.cfg file
+
+## To-Do
+- incorporate SSL certificate placement
