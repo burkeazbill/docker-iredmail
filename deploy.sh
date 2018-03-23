@@ -27,7 +27,9 @@ sh -c 'tail -n +0 --pid=$$ -f /srv/iredmail/vmail/*.log | { sed "/Container requ
 docker-compose restart
 #### Additional iRedMail Notes:
 echo Your mail server is ready for testing!
-echo Webmail Administration: http://mail.rainpole.com/iredadmin > /root/iredmail-readme.txt
+echo "" > /root/iredmail-readme.txt
+echo ============================== iRedMail ======================================  >> /root/iredmail-readme.txt
+echo Webmail Administration: http://mail.rainpole.com/iredadmin >> /root/iredmail-readme.txt
 echo Login as postmaster@rainpole.com / VMware1! >> /root/iredmail-readme.txt
 echo Webmail URL: http://mail.rainpole.com >> /root/iredmail-readme.txt
 echo The access urls have been added to /root/iredmail-readme.txt
