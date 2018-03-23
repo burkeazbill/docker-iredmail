@@ -28,9 +28,11 @@ docker-compose restart
 #### Additional iRedMail Notes:
 echo Your mail server is ready for testing!
 echo "" > /root/iredmail-readme.txt
-echo ============================== iRedMail ======================================  >> /root/iredmail-readme.txt
+echo ============================== iRedMail ====================================  >> /root/iredmail-readme.txt
 echo Webmail Administration: http://mail.rainpole.com/iredadmin >> /root/iredmail-readme.txt
 echo Login as postmaster@rainpole.com / VMware1! >> /root/iredmail-readme.txt
 echo Webmail URL: http://mail.rainpole.com >> /root/iredmail-readme.txt
-echo To access the console of the iredmail container: docker exec -it iredmail /bin/bash >> /root/iredmail-readme.txt
+echo To access the console of the iredmail container:  >> /root/iredmail-readme.txt
+echo   docker exec -it iredmail /bin/bash >> /root/iredmail-readme.txt
 echo The access urls have been added to /root/iredmail-readme.txt
+cat /root/iredmail-readme.txt
